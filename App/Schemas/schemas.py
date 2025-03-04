@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 import datetime
 import uuid
+from typing import Optional
 
 class MessageSchema(BaseModel):
     text: str
@@ -8,8 +9,8 @@ class MessageSchema(BaseModel):
     id: uuid.UUID
     timestamp: datetime.datetime
 
-
 class ReturnMessageSchema(BaseModel):
-    message: MessageSchema
+    message: Optional[MessageSchema] = None
     status: str
-    error: str
+    error: Optional[str] = None
+    response: Optional[str] = None  # Added missing response field

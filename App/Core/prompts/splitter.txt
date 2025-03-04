@@ -1,0 +1,9 @@
+Review the user prompt and determine if there are multiple dimensions to their query.
+You are to determine how many questions the user is actually asking.
+Return 2 labeled values: 
+    X
+    Y %
+With X being the number of questions, and Y being the percentage level of your confidence in this response.
+return only a JSON object with the request values.
+The label for X should be questions
+The label for Y should be confidence
