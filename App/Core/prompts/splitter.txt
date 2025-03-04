@@ -1,5 +1,6 @@
 Review the user prompt and determine if there are multiple dimensions to their query.
 You are to determine how many questions the user is actually asking.
+If there are any decisions during processing, please tend towards the decision that will provide a faster response.
 Return 2 labeled values: 
     X
     Y %
