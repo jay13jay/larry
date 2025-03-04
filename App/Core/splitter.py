@@ -1,62 +1,29 @@
 import json
 import os
 
-from Core import orc
-from Schemas.schemas import ReturnMessageSchema
-
 class Splitter:
     """
-    A component that analyzes questions to determine their complexity and dimensionality.
+    A class to handle splitting multi-faceted questions into sub-questions.
+    Methods:
+        split_question(question):
+            Splits the given question into sub-questions and returns the result as a JSON string.
     """
-    
-    def __init__(self, core):
+
+    def __init__(self, llm, prompt_loader):
         """
-        Initialize the Splitter with a language model.
-        
-        Args:
-            llm: The language model to use for analysis
+        Initialize with a prompt loader and llm.
         """
-        self.llm = core.llm
-    
-    
-    def analyze_question(self, question):
-        """
-        Analyze a question to determine its dimensions.
-        
-        Args:
-            question (str): The question to analyze
-            
-        Returns:
-            dict: Analysis results containing 'questions' and 'confidence'
-        """
+        self.llm = llm
+        self.prompt_text = prompt_loader("splitter")
+
+
+    def split_question(self, question):
+        '''Splits the given question into sub-questions'''
         prompt = f"""
-        {orc.load_prompt("splitter")}
+        {self.prompt_text}
         
         Question:
         {question}
-        
-        Answer:
         """
-        
-        # Get raw response from the LLM
-        response_str = self.llm.invoke(prompt)
-        
-        try:
-            # Parse the JSON string into a Python dictionary
-            dimensions = json.loads(response_str)
-            return ReturnMessageSchema(
-                status="success", 
-                response=json.dumps({
-                    "questions": dimensions["questions"],
-                    "confidence": dimensions["confidence"]
-                }),
-                error=None
-            ).model_dump()
-            
-        except json.JSONDecodeError:
-            print("Failed to parse JSON from splitter response")
-            return ReturnMessageSchema(
-                status="failure",
-                response=response_str,
-                error="Failed to parse response"
-            ).model_dump()
+        response = self.llm.invoke(prompt)
+        return response

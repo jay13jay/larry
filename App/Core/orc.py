@@ -1,6 +1,8 @@
 import os
 import json
 
+from Core.splitter import Splitter
+
 class RAGCore:
     """
     A class to handle retrieval-augmented generation (RAG) using a vector store, an embedder, and a language model (LLM).
@@ -27,6 +29,15 @@ class RAGCore:
         self.embedder = embedder
         self.llm = llm
         self.prompts_dir = os.path.join(os.path.dirname(__file__), 'prompts')
+        
+        # Initialize splitter AFTER setting prompts_dir
+        self.splitter = Splitter(
+            llm=self.llm,
+            prompt_loader=self.load_prompt  # Pass the function reference
+        )
+
+        self.status = "uninitialized" # uninitialized, ready, busy
+        self.tasks = 0 # Number of tasks unprocessed
 
 
     def get_context(self, user_question, top_k=5):
@@ -80,21 +91,7 @@ class RAGCore:
 
     def new_user_query(self, question):
         '''Process a new user query'''
-        # Determine if this is a multi-faceted question
-        # If so, split into sub-questions
-        q_dimensions_str = self.query(question, 'splitter', 0)
+        # Use the splitter class to determine if this is a multi-faceted question
+        q_dimensions_str = self.splitter.split_question(question)
         print("Question dimensions:", q_dimensions_str)
         
-        try:
-            # Parse the JSON string into a Python dictionary
-            q_dimensions = json.loads(q_dimensions_str)
-            num_questions = q_dimensions["questions"]  # Remove the [0] indexing
-            confidence = q_dimensions["confidence"]
-            
-            print(f"Number of questions: {num_questions} (Confidence: {confidence}%)")
-            
-            return f"Your question has {num_questions} parts with {confidence}% confidence."
-            
-        except json.JSONDecodeError:
-            print("Failed to parse JSON from splitter response")
-            return "I couldn't properly analyze your question. Please try again."

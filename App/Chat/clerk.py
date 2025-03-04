@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from Schemas.schemas import MessageSchema, ReturnMessageSchema
+# from Schemas.schemas import MessageSchema, ReturnMessageSchema  # Remove these imports
 from pydantic import ValidationError
 from Core.orc import RAGCore
 from components import vector_store, embedder, llm  # Add this import
@@ -14,31 +14,32 @@ class ChatSession:
 
     def add_message(self, text):
         try:
-            message_data = MessageSchema(
-                text=text,
-                user=self.user_name,
-                id=uuid.uuid4(),  # Remove str() - provide actual UUID
-                timestamp=datetime.now()  # Remove isoformat() - provide actual datetime
-            )
+            # Remove MessageSchema usage
+            message_data = {
+                'text': text,
+                'user': self.user_name,
+                'id': uuid.uuid4(),  # Remove str() - provide actual UUID
+                'timestamp': datetime.now()  # Remove isoformat() - provide actual datetime
+            }
         except ValidationError as e:
-            return ReturnMessageSchema(
-                message=None,
-                status='failure',
-                error=str(e),
-                response=None  # Added for consistency
-            ).model_dump(), 400
+            return {
+                'message': None,
+                'status': 'failure',
+                'error': str(e),
+                'response': []  # Ensure response is a list
+            }, 400
         
         self.messages.append(message_data)
         
         # Call a function from orc after messages.append
         response = self.rag_core.new_user_query(question=text)
         
-        return ReturnMessageSchema(
-            message=message_data,
-            status='success',
-            error=None,
-            response=response
-        ).model_dump()
+        return {
+            'message': message_data,
+            'status': 'success',
+            'error': None,
+            'response': [response]  # Ensure response is a list
+        }
 
     def get_messages(self):
-        return [message.model_dump() for message in self.messages]
+        return self.messages

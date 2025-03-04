@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 import datetime
 import uuid
-from typing import Optional
+from typing import Optional, List
 
 class MessageSchema(BaseModel):
     text: str
@@ -13,4 +13,4 @@ class ReturnMessageSchema(BaseModel):
     message: Optional[MessageSchema] = None
     status: str
     error: Optional[str] = None
-    response: Optional[str] = None  # Added missing response field
+    response: List = []
